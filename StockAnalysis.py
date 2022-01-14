@@ -54,22 +54,30 @@ def get_price(code):
     data = json.loads(r.text)
     df = pd.DataFrame(data['data'])
 
+
     s_code = df.iat[2, 0]
     s_price = df.iat[-1, 3]
+    y_price = df.iat[-2, 3]
+    y_difference = s_price - y_price
+    w_price = df.iat[-8, 3]
+    w_difference = s_price - w_price
+
     s_highest = df["highPrice"].max()
     s_lowest = df["lowPrice"].min()
     s_percentile = "{:.2f}".format((s_price - s_lowest)/(s_highest - s_lowest))
     s_percentile_1000 = "{:.2f}".format((s_price - s_lowest_1000) / (s_highest_1000 - s_lowest_1000))
 
-    df1 = pd.DataFrame({"Code": [s_code], "Price": [s_price], "90일_H": [s_highest], "90_L": [s_lowest],
+    df1 = pd.DataFrame({"Code": [s_code], "Price": [s_price], "Y_Price": [y_price], "1day_D": [y_difference],
+                        "W_Price": [w_price], "1주일_D": [w_difference], "90일_H": [s_highest], "90_L": [s_lowest],
                         "90_P": [s_percentile], "1000일_H": [s_highest_1000], "1000일_L": [s_lowest_1000],
                         "1000일_P": [s_percentile_1000]})
     return df1
 
 def get_info():
     global drt
-    df = pd.read_html('http://kind.krx.co.kr/corpgeneral/corpList.do?method=download', header=0)[0]
 
+    df = pd.read_html('http://kind.krx.co.kr/corpgeneral/corpList.do?method=download', header=0)[0]
+    print("A")
     df = df[['회사명', '종목코드']]
     df = df.rename(columns={'회사명': 'Name', '종목코드': 'Code'})
 
