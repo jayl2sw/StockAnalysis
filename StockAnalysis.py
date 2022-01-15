@@ -12,6 +12,7 @@ today = datetime.today().strftime('%Y-%m-%d')
 drt = ()
 windows_user_name = os.path.expanduser('~')
 
+
 def get_price(code):
     # DATA를 불러오는 부분 입니다.
     url = 'http://finance.daum.net/api/charts/A%s/days?limit=%d&adjusted=true' % (code, 90)
@@ -46,14 +47,25 @@ def get_price(code):
 
     data_1000 = json.loads(r_1000.text)
     df_1000 = pd.DataFrame(data_1000['data'])
+
     s_highest_1000 = df_1000["highPrice"].max()
     s_lowest_1000 = df_1000["lowPrice"].min()
 
+    url_JMJP = 'http://finance.naver.com/item/main.nhn?code=%s' % (code)
+    tables = pd.read_html(url_JMJP, encoding='euc-kr')
+    df_JMJP = tables[3]
+
+    Sales_2021 = df_JMJP.iat[0, 4]
+    OperatingIncome_2021 = df_JMJP.iat[1, 4]
+    NetIncome_2021 = df_JMJP.iat[2, 4]
+
+    Sales_2020 = df_JMJP.iat[0, 3]
+    OperatingIncome_2020 = df_JMJP.iat[1, 3]
+    NetIncome_2020 = df_JMJP.iat[2, 3]
 
     # DATA를 보기 좋게 편집하는 부분 입니다.
     data = json.loads(r.text)
     df = pd.DataFrame(data['data'])
-
 
     s_code = df.iat[2, 0]
     s_price = df.iat[-1, 3]
@@ -64,14 +76,17 @@ def get_price(code):
 
     s_highest = df["highPrice"].max()
     s_lowest = df["lowPrice"].min()
-    s_percentile = "{:.2f}".format((s_price - s_lowest)/(s_highest - s_lowest))
+    s_percentile = "{:.2f}".format((s_price - s_lowest) / (s_highest - s_lowest))
     s_percentile_1000 = "{:.2f}".format((s_price - s_lowest_1000) / (s_highest_1000 - s_lowest_1000))
 
     df1 = pd.DataFrame({"Code": [s_code], "Price": [s_price], "Y_Price": [y_price], "1day_D": [y_difference],
                         "W_Price": [w_price], "1주일_D": [w_difference], "90일_H": [s_highest], "90_L": [s_lowest],
                         "90_P": [s_percentile], "1000일_H": [s_highest_1000], "1000일_L": [s_lowest_1000],
-                        "1000일_P": [s_percentile_1000]})
+                        "1000일_P": [s_percentile_1000], "매출_21": [Sales_2021], "영업_21": [OperatingIncome_2021],
+                        "순이익_21": [NetIncome_2021], "매출_20": [Sales_2020], "영업_20": [OperatingIncome_2020],
+                        "순이익_20": [NetIncome_2020]})
     return df1
+
 
 def get_info():
     global drt
@@ -97,9 +112,6 @@ def get_info():
             nc_df = df.loc[df.index[df['Name'] == in_name]]
             fnc_df = fnc_df.append(nc_df)
             i = i + 1
-
-
-
 
     j = 0
     while j < len(fnc_df):
@@ -129,8 +141,6 @@ class MainWindow(QMainWindow):
         btn = self.sender()
         btn.setText('runing')
         btn.setDisabled(True)  # 버튼 비활성화
-
-
 
     def filedialog_open(self):
 
@@ -169,13 +179,14 @@ class MainWindow(QMainWindow):
         self.path = QTextEdit(self)
         self.path.setGeometry(165, 20, 400, 74)
 
-        self.exe_btn = QPushButton('확인',self)
+        self.exe_btn = QPushButton('확인', self)
         self.exe_btn.clicked.connect(get_info)
         self.exe_btn.setGeometry(580, 60, 95, 32)
 
         self.quit_btn = QPushButton('취소', self)
         self.quit_btn.setGeometry(685, 60, 95, 32)
         self.quit_btn.clicked.connect(QApplication.instance().quit)
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
