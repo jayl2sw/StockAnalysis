@@ -54,6 +54,7 @@ def get_price(code):
     url_JMJP = 'http://finance.naver.com/item/main.nhn?code=%s' % (code)
     tables = pd.read_html(url_JMJP, encoding='euc-kr')
     df_JMJP = tables[3]
+    df_MC = tables[5]
 
     Sales_2021 = df_JMJP.iat[0, 4]
     OperatingIncome_2021 = df_JMJP.iat[1, 4]
@@ -62,6 +63,8 @@ def get_price(code):
     Sales_2020 = df_JMJP.iat[0, 3]
     OperatingIncome_2020 = df_JMJP.iat[1, 3]
     NetIncome_2020 = df_JMJP.iat[2, 3]
+
+    marketcap = df_MC.iat[0, 1]
 
     # DATA를 보기 좋게 편집하는 부분 입니다.
     data = json.loads(r.text)
@@ -84,7 +87,7 @@ def get_price(code):
                         "90_P": [s_percentile], "1000일_H": [s_highest_1000], "1000일_L": [s_lowest_1000],
                         "1000일_P": [s_percentile_1000], "매출_21": [Sales_2021], "영업_21": [OperatingIncome_2021],
                         "순이익_21": [NetIncome_2021], "매출_20": [Sales_2020], "영업_20": [OperatingIncome_2020],
-                        "순이익_20": [NetIncome_2020]})
+                        "순이익_20": [NetIncome_2020], "시가총액": [marketcap]})
     return df1
 
 
@@ -163,7 +166,7 @@ class MainWindow(QMainWindow):
         super().__init__()
         # 윈도우 설정
         self.setGeometry(300, 200, 800, 120)  # x, y, w, h
-        self.setWindowTitle('아빠 화이팅!')
+        self.setWindowTitle('주식분석기!')
 
         self.Lbl1 = QLabel(self)
         self.Lbl1.setText('주식 종목 파일:')
