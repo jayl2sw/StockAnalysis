@@ -6,89 +6,173 @@ from dateutil.utils import today
 from datetime import datetime
 import os
 import sys
-from PyQt5.QtWidgets import QFileDialog, QMainWindow, QApplication, QPushButton, QMessageBox, QLabel, QTextEdit
-
+from PyQt5.QtWidgets import QFileDialog, QMainWindow, QApplication, QPushButton, QMessageBox, QLabel, QTextEdit,  QWidget, QProgressBar
+from PyQt5.QtCore import QBasicTimer
+7
 today = datetime.today().strftime('%Y-%m-%d')
 drt = ()
 windows_user_name = os.path.expanduser('~')
 
 
-def get_price(code):
-    # DATA를 불러오는 부분 입니다.
-    url = 'http://finance.daum.net/api/charts/A%s/days?limit=%d&adjusted=true' % (code, 90)
-    headers = {
-        'Accept': 'application/json, text/plain, */*',
-        'Accept-Encoding': 'gzip, deflate',
-        'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
-        'Connection': 'keep-alive',
-        'Cookie': 'GS_font_Name_no=0; GS_font_size=16; _ga=GA1.3.937989519.1493034297; webid=bb619e03ecbf4672b8d38a3fcedc3f8c; _ga=GA1.2.937989519.1493034297; _gid=GA1.2.215330840.1541556419; KAKAO_STOCK_RECENT=[%22A069500%22]; recentMenus=[{%22destination%22:%22chart%22%2C%22title%22:%22%EC%B0%A8%ED%8A%B8%22}%2C{%22destination%22:%22current%22%2C%22title%22:%22%ED%98%84%EC%9E%AC%EA%B0%80%22}]; TIARA=C-Tax5zAJ3L1CwQFDxYNxe-9yt4xuvAcw3IjfDg6hlCbJ_KXLZZhwEPhrMuSc5Rv1oty5obaYZzBQS5Du9ne5x7XZds-vHVF; webid_sync=1541565778037; _gat_gtag_UA_128578811_1=1; _dfs=VFlXMkVwUGJENlVvc1B3V2NaV1pFdHhpNTVZdnRZTWFZQWZwTzBPYWRxMFNVL3VrODRLY1VlbXI0dHhBZlJzcE03SS9Vblh0U2p2L2V2b3hQbU5mNlE9PS0tcGI2aXQrZ21qY0hFbzJ0S1hkaEhrZz09--6eba3111e6ac36d893bbc58439d2a3e0304c7cf3',
-        'Host': 'finance.daum.net',
-        'If-None-Match': 'W/"23501689faaaf24452ece4a039a904fd"',
-        'Referer': 'http://finance.daum.net/quotes/A069500',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36'
-    }
-    headers['Referer'] = 'http://finance.daum.net/quotes/A%s' % code
-    r = requests.get(url, headers=headers)
+def get_price_k(code):
+    try:
+        url = 'http://finance.daum.net/api/charts/A%s/days?limit=%d&adjusted=true' % (code, 90)
+        headers = {
+            'Accept': 'application/json, text/plain, */*',
+            'Accept-Encoding': 'gzip, deflate',
+            'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
+            'Connection': 'keep-alive',
+            'Cookie': 'GS_font_Name_no=0; GS_font_size=16; _ga=GA1.3.937989519.1493034297; webid=bb619e03ecbf4672b8d38a3fcedc3f8c; _ga=GA1.2.937989519.1493034297; _gid=GA1.2.215330840.1541556419; KAKAO_STOCK_RECENT=[%22A069500%22]; recentMenus=[{%22destination%22:%22chart%22%2C%22title%22:%22%EC%B0%A8%ED%8A%B8%22}%2C{%22destination%22:%22current%22%2C%22title%22:%22%ED%98%84%EC%9E%AC%EA%B0%80%22}]; TIARA=C-Tax5zAJ3L1CwQFDxYNxe-9yt4xuvAcw3IjfDg6hlCbJ_KXLZZhwEPhrMuSc5Rv1oty5obaYZzBQS5Du9ne5x7XZds-vHVF; webid_sync=1541565778037; _gat_gtag_UA_128578811_1=1; _dfs=VFlXMkVwUGJENlVvc1B3V2NaV1pFdHhpNTVZdnRZTWFZQWZwTzBPYWRxMFNVL3VrODRLY1VlbXI0dHhBZlJzcE03SS9Vblh0U2p2L2V2b3hQbU5mNlE9PS0tcGI2aXQrZ21qY0hFbzJ0S1hkaEhrZz09--6eba3111e6ac36d893bbc58439d2a3e0304c7cf3',
+            'Host': 'finance.daum.net',
+            'If-None-Match': 'W/"23501689faaaf24452ece4a039a904fd"',
+            'Referer': 'http://finance.daum.net/quotes/A069500',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36'
+        }
+        headers['Referer'] = 'http://finance.daum.net/quotes/A%s' % code
+        r = requests.get(url, headers=headers)
 
-    url_1000 = 'http://finance.daum.net/api/charts/A%s/days?limit=%d&adjusted=true' % (code, 1000)
-    headers_1000 = {
-        'Accept': 'application/json, text/plain, */*',
-        'Accept-Encoding': 'gzip, deflate',
-        'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
-        'Connection': 'keep-alive',
-        'Cookie': 'GS_font_Name_no=0; GS_font_size=16; _ga=GA1.3.937989519.1493034297; webid=bb619e03ecbf4672b8d38a3fcedc3f8c; _ga=GA1.2.937989519.1493034297; _gid=GA1.2.215330840.1541556419; KAKAO_STOCK_RECENT=[%22A069500%22]; recentMenus=[{%22destination%22:%22chart%22%2C%22title%22:%22%EC%B0%A8%ED%8A%B8%22}%2C{%22destination%22:%22current%22%2C%22title%22:%22%ED%98%84%EC%9E%AC%EA%B0%80%22}]; TIARA=C-Tax5zAJ3L1CwQFDxYNxe-9yt4xuvAcw3IjfDg6hlCbJ_KXLZZhwEPhrMuSc5Rv1oty5obaYZzBQS5Du9ne5x7XZds-vHVF; webid_sync=1541565778037; _gat_gtag_UA_128578811_1=1; _dfs=VFlXMkVwUGJENlVvc1B3V2NaV1pFdHhpNTVZdnRZTWFZQWZwTzBPYWRxMFNVL3VrODRLY1VlbXI0dHhBZlJzcE03SS9Vblh0U2p2L2V2b3hQbU5mNlE9PS0tcGI2aXQrZ21qY0hFbzJ0S1hkaEhrZz09--6eba3111e6ac36d893bbc58439d2a3e0304c7cf3',
-        'Host': 'finance.daum.net',
-        'If-None-Match': 'W/"23501689faaaf24452ece4a039a904fd"',
-        'Referer': 'http://finance.daum.net/quotes/A069500',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36'
-    }
-    headers_1000['Referer'] = 'http://finace.daum.et/quotes/A%s' % code
-    r_1000 = requests.get(url_1000, headers=headers_1000)
+        url_1000 = 'http://finance.daum.net/api/charts/A%s/days?limit=%d&adjusted=true' % (code, 1000)
+        headers_1000 = {
+            'Accept': 'application/json, text/plain, */*',
+            'Accept-Encoding': 'gzip, deflate',
+            'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
+            'Connection': 'keep-alive',
+            'Cookie': 'GS_font_Name_no=0; GS_font_size=16; _ga=GA1.3.937989519.1493034297; webid=bb619e03ecbf4672b8d38a3fcedc3f8c; _ga=GA1.2.937989519.1493034297; _gid=GA1.2.215330840.1541556419; KAKAO_STOCK_RECENT=[%22A069500%22]; recentMenus=[{%22destination%22:%22chart%22%2C%22title%22:%22%EC%B0%A8%ED%8A%B8%22}%2C{%22destination%22:%22current%22%2C%22title%22:%22%ED%98%84%EC%9E%AC%EA%B0%80%22}]; TIARA=C-Tax5zAJ3L1CwQFDxYNxe-9yt4xuvAcw3IjfDg6hlCbJ_KXLZZhwEPhrMuSc5Rv1oty5obaYZzBQS5Du9ne5x7XZds-vHVF; webid_sync=1541565778037; _gat_gtag_UA_128578811_1=1; _dfs=VFlXMkVwUGJENlVvc1B3V2NaV1pFdHhpNTVZdnRZTWFZQWZwTzBPYWRxMFNVL3VrODRLY1VlbXI0dHhBZlJzcE03SS9Vblh0U2p2L2V2b3hQbU5mNlE9PS0tcGI2aXQrZ21qY0hFbzJ0S1hkaEhrZz09--6eba3111e6ac36d893bbc58439d2a3e0304c7cf3',
+            'Host': 'finance.daum.net',
+            'If-None-Match': 'W/"23501689faaaf24452ece4a039a904fd"',
+            'Referer': 'http://finance.daum.net/quotes/A069500',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36'
+        }
+        headers_1000['Referer'] = 'http://finace.daum.et/quotes/A%s' % code
+        r_1000 = requests.get(url_1000, headers=headers_1000)
 
-    data_1000 = json.loads(r_1000.text)
-    df_1000 = pd.DataFrame(data_1000['data'])
+        data_1000 = json.loads(r_1000.text)
+        df_1000 = pd.DataFrame(data_1000['data'])
 
-    s_highest_1000 = df_1000["highPrice"].max()
-    s_lowest_1000 = df_1000["lowPrice"].min()
+        s_highest_1000 = df_1000["highPrice"].max()
+        s_lowest_1000 = df_1000["lowPrice"].min()
 
-    url_JMJP = 'http://finance.naver.com/item/main.nhn?code=%s' % (code)
-    tables = pd.read_html(url_JMJP, encoding='euc-kr')
-    df_JMJP = tables[3]
-    df_MC = tables[5]
+        url_JMJP = 'http://finance.naver.com/item/main.nhn?code=%s' % (code)
+        tables = pd.read_html(url_JMJP, encoding='euc-kr')
+        df_JMJP = tables[3]
+        df_MC = tables[5]
 
-    Sales_2021 = df_JMJP.iat[0, 4]
-    OperatingIncome_2021 = df_JMJP.iat[1, 4]
-    NetIncome_2021 = df_JMJP.iat[2, 4]
+        Sales_2021 = df_JMJP.iat[0, 4]
+        OperatingIncome_2021 = df_JMJP.iat[1, 4]
+        NetIncome_2021 = df_JMJP.iat[2, 4]
 
-    Sales_2020 = df_JMJP.iat[0, 3]
-    OperatingIncome_2020 = df_JMJP.iat[1, 3]
-    NetIncome_2020 = df_JMJP.iat[2, 3]
+        Sales_2020 = df_JMJP.iat[0, 3]
+        OperatingIncome_2020 = df_JMJP.iat[1, 3]
+        NetIncome_2020 = df_JMJP.iat[2, 3]
 
-    marketcap = df_MC.iat[0, 1]
+        marketcap = df_MC.iat[0, 1]
 
-    # DATA를 보기 좋게 편집하는 부분 입니다.
-    data = json.loads(r.text)
-    df = pd.DataFrame(data['data'])
+        # DATA를 보기 좋게 편집하는 부분 입니다.
+        data = json.loads(r.text)
+        df = pd.DataFrame(data['data'])
 
-    s_code = df.iat[2, 0]
-    s_price = df.iat[-1, 3]
-    y_price = df.iat[-2, 3]
-    y_difference = s_price - y_price
-    w_price = df.iat[-8, 3]
-    w_difference = s_price - w_price
+        s_code = df.iat[2, 0]
+        s_price = df.iat[-1, 3]
+        y_price = df.iat[-2, 3]
+        y_difference = s_price - y_price
+        w_price = df.iat[-8, 3]
+        w_difference = s_price - w_price
 
-    s_highest = df["highPrice"].max()
-    s_lowest = df["lowPrice"].min()
-    s_percentile = "{:.2f}".format((s_price - s_lowest) / (s_highest - s_lowest))
-    s_percentile_1000 = "{:.2f}".format((s_price - s_lowest_1000) / (s_highest_1000 - s_lowest_1000))
+        s_highest = df["highPrice"].max()
+        s_lowest = df["lowPrice"].min()
+        try:
+            s_percentile = "{:.2f}".format((s_price - s_lowest) / (s_highest - s_lowest))
+        except Exception as exp:
+            print(exp)
+            s_percentile = 0
 
-    df1 = pd.DataFrame({"Code": [s_code], "Price": [s_price], "Y_Price": [y_price], "1day_D": [y_difference],
-                        "W_Price": [w_price], "1주일_D": [w_difference], "90일_H": [s_highest], "90_L": [s_lowest],
-                        "90_P": [s_percentile], "1000일_H": [s_highest_1000], "1000일_L": [s_lowest_1000],
-                        "1000일_P": [s_percentile_1000], "매출_21": [Sales_2021], "영업_21": [OperatingIncome_2021],
-                        "순이익_21": [NetIncome_2021], "매출_20": [Sales_2020], "영업_20": [OperatingIncome_2020],
-                        "순이익_20": [NetIncome_2020], "시가총액": [marketcap]})
-    return df1
+        try:
+            s_percentile_1000 = "{:.2f}".format((s_price - s_lowest_1000) / (s_highest_1000 - s_lowest_1000))
+        except Exception as exp:
+            print(exp)
+            s_percentile_1000 = 0
+
+        df1 = pd.DataFrame({"Code": [s_code], "Price": [s_price], "Y_Price": [y_price], "1day_D": [y_difference],
+                            "W_Price": [w_price], "1주일_D": [w_difference], "90일_H": [s_highest], "90_L": [s_lowest],
+                            "90_P": [s_percentile], "1000일_H": [s_highest_1000], "1000일_L": [s_lowest_1000],
+                            "1000일_P": [s_percentile_1000], "매출_21": [Sales_2021], "영업_21": [OperatingIncome_2021],
+                            "순이익_21": [NetIncome_2021], "매출_20": [Sales_2020], "영업_20": [OperatingIncome_2020],
+                            "순이익_20": [NetIncome_2020], "시가총액": [marketcap]})
+        return df1
+    except Exception as ex:
+        try:
+            url = 'http://finance.daum.net/api/charts/A%s/days?limit=%d&adjusted=true' % (code, 90)
+            headers = {
+                'Accept': 'application/json, text/plain, */*',
+                'Accept-Encoding': 'gzip, deflate',
+                'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
+                'Connection': 'keep-alive',
+                'Cookie': 'GS_font_Name_no=0; GS_font_size=16; _ga=GA1.3.937989519.1493034297; webid=bb619e03ecbf4672b8d38a3fcedc3f8c; _ga=GA1.2.937989519.1493034297; _gid=GA1.2.215330840.1541556419; KAKAO_STOCK_RECENT=[%22A069500%22]; recentMenus=[{%22destination%22:%22chart%22%2C%22title%22:%22%EC%B0%A8%ED%8A%B8%22}%2C{%22destination%22:%22current%22%2C%22title%22:%22%ED%98%84%EC%9E%AC%EA%B0%80%22}]; TIARA=C-Tax5zAJ3L1CwQFDxYNxe-9yt4xuvAcw3IjfDg6hlCbJ_KXLZZhwEPhrMuSc5Rv1oty5obaYZzBQS5Du9ne5x7XZds-vHVF; webid_sync=1541565778037; _gat_gtag_UA_128578811_1=1; _dfs=VFlXMkVwUGJENlVvc1B3V2NaV1pFdHhpNTVZdnRZTWFZQWZwTzBPYWRxMFNVL3VrODRLY1VlbXI0dHhBZlJzcE03SS9Vblh0U2p2L2V2b3hQbU5mNlE9PS0tcGI2aXQrZ21qY0hFbzJ0S1hkaEhrZz09--6eba3111e6ac36d893bbc58439d2a3e0304c7cf3',
+                'Host': 'finance.daum.net',
+                'If-None-Match': 'W/"23501689faaaf24452ece4a039a904fd"',
+                'Referer': 'http://finance.daum.net/quotes/A069500',
+                'User-Agent': 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36'
+            }
+            headers['Referer'] = 'http://finance.daum.net/quotes/A%s' % code
+            r = requests.get(url, headers=headers)
+
+            url_1000 = 'http://finance.daum.net/api/charts/A%s/days?limit=%d&adjusted=true' % (code, 1000)
+            headers_1000 = {
+                'Accept': 'application/json, text/plain, */*',
+                'Accept-Encoding': 'gzip, deflate',
+                'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
+                'Connection': 'keep-alive',
+                'Cookie': 'GS_font_Name_no=0; GS_font_size=16; _ga=GA1.3.937989519.1493034297; webid=bb619e03ecbf4672b8d38a3fcedc3f8c; _ga=GA1.2.937989519.1493034297; _gid=GA1.2.215330840.1541556419; KAKAO_STOCK_RECENT=[%22A069500%22]; recentMenus=[{%22destination%22:%22chart%22%2C%22title%22:%22%EC%B0%A8%ED%8A%B8%22}%2C{%22destination%22:%22current%22%2C%22title%22:%22%ED%98%84%EC%9E%AC%EA%B0%80%22}]; TIARA=C-Tax5zAJ3L1CwQFDxYNxe-9yt4xuvAcw3IjfDg6hlCbJ_KXLZZhwEPhrMuSc5Rv1oty5obaYZzBQS5Du9ne5x7XZds-vHVF; webid_sync=1541565778037; _gat_gtag_UA_128578811_1=1; _dfs=VFlXMkVwUGJENlVvc1B3V2NaV1pFdHhpNTVZdnRZTWFZQWZwTzBPYWRxMFNVL3VrODRLY1VlbXI0dHhBZlJzcE03SS9Vblh0U2p2L2V2b3hQbU5mNlE9PS0tcGI2aXQrZ21qY0hFbzJ0S1hkaEhrZz09--6eba3111e6ac36d893bbc58439d2a3e0304c7cf3',
+                'Host': 'finance.daum.net',
+                'If-None-Match': 'W/"23501689faaaf24452ece4a039a904fd"',
+                'Referer': 'http://finance.daum.net/quotes/A069500',
+                'User-Agent': 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36'
+            }
+            headers_1000['Referer'] = 'http://finace.daum.et/quotes/A%s' % code
+            r_1000 = requests.get(url_1000, headers=headers_1000)
+
+            data_1000 = json.loads(r_1000.text)
+            df_1000 = pd.DataFrame(data_1000['data'])
+
+            s_highest_1000 = df_1000["highPrice"].max()
+            s_lowest_1000 = df_1000["lowPrice"].min()
+
+            data = json.loads(r.text)
+            df = pd.DataFrame(data['data'])
+
+            s_code = df.iat[2, 0]
+            s_price = df.iat[-1, 3]
+            y_price = df.iat[-2, 3]
+            y_difference = s_price - y_price
+            w_price = df.iat[-8, 3]
+            w_difference = s_price - w_price
+
+            s_highest = df["highPrice"].max()
+            s_lowest = df["lowPrice"].min()
+            try:
+                s_percentile = "{:.2f}".format((s_price - s_lowest) / (s_highest - s_lowest))
+            except Exception as exp:
+                print(exp)
+                s_percentile = 0
+
+            try:
+                s_percentile_1000 = "{:.2f}".format((s_price - s_lowest_1000) / (s_highest_1000 - s_lowest_1000))
+            except Exception as exp:
+                print(exp)
+                s_percentile_1000 = 0
+
+            df1 = pd.DataFrame({"Code": [s_code], "Price": [s_price], "Y_Price": [y_price], "1day_D": [y_difference],
+                                "W_Price": [w_price], "1주일_D": [w_difference], "90일_H": [s_highest], "90_L": [s_lowest],
+                                "90_P": [s_percentile], "1000일_H": [s_highest_1000], "1000일_L": [s_lowest_1000],
+                                "1000일_P": [s_percentile_1000], "매출_21": None, "영업_21": None,
+                                "순이익_21": None, "매출_20": None, "영업_20": None,
+                                "순이익_20": None, "시가총액": None})
+            return df1
+        except Exception as ex:
+            print(ex, type(ex))
+            df2 = pd.DataFrame({"Code": [s_code], "Price": [s_price]})
+
+            return df2
 
 
 def get_info():
@@ -120,11 +204,11 @@ def get_info():
     while j < len(fnc_df):
         in_code = str(fnc_df.iat[j, 1]).zfill(6)
         if j == 0:
-            cphl_df = get_price(in_code)
+            cphl_df = get_price_k(in_code)
             fcphl_df = cphl_df
             j = j + 1
         else:
-            cphl_df = get_price(in_code)
+            cphl_df = get_price_k(in_code)
             fcphl_df = fcphl_df.append(cphl_df)
             j = j + 1
 
@@ -163,6 +247,7 @@ class MainWindow(QMainWindow):
 
     def __init__(self):
         global drt
+
         super().__init__()
         # 윈도우 설정
         self.setGeometry(300, 200, 800, 120)  # x, y, w, h
