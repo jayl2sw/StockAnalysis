@@ -82,17 +82,17 @@ def get_price(code):
         df_1000 = pd.DataFrame(data_1000['data'])
 
         s_code = df.iat[2, 0]
-        s_price = int(df.iat[-1, 3])
-        y_price = int(df.iat[-2, 3])
-        y_difference = int(s_price - y_price)
-        w_price = int(df.iat[-8, 3])
-        w_difference = int(s_price - w_price)
+        s_price = df.iat[-1, 3]
+        y_price = df.iat[-2, 3]
+        y_difference = s_price - y_price
+        w_price = df.iat[-8, 3]
+        w_difference = s_price - w_price
 
-        s_highest = int(df["highPrice"].max())
-        s_lowest = int(df["lowPrice"].min())
+        s_highest = df["highPrice"].max()
+        s_lowest = df["lowPrice"].min()
 
-        s_highest_1000 = int(df_1000["highPrice"].max())
-        s_lowest_1000 = int(df_1000["lowPrice"].min())
+        s_highest_1000 = df_1000["highPrice"].max()
+        s_lowest_1000 = df_1000["lowPrice"].min()
 
         try:
             s_percentile = "{:.2f}".format((s_price - s_lowest) / (s_highest - s_lowest))
@@ -111,22 +111,22 @@ def get_price(code):
         df_JMJP = tables[3]
         df_MC = tables[5]
 
-        Sales_2021 = int(df_JMJP.iat[0, 4])
-        OperatingIncome_2021 = int(df_JMJP.iat[1, 4])
-        NetIncome_2021 = int(df_JMJP.iat[2, 4])
+        Sales_2021 = df_JMJP.iat[0, 4]
+        OperatingIncome_2021 = df_JMJP.iat[1, 4]
+        NetIncome_2021 = df_JMJP.iat[2, 4]
 
-        Sales_2020 = int(df_JMJP.iat[0, 3])
-        OperatingIncome_2020 = int(df_JMJP.iat[1, 3])
-        NetIncome_2020 = int(df_JMJP.iat[2, 3])
+        Sales_2020 = df_JMJP.iat[0, 3]
+        OperatingIncome_2020 = df_JMJP.iat[1, 3]
+        NetIncome_2020 = df_JMJP.iat[2, 3]
 
-        market_cap = int(df_MC.iat[0, 1])
+        marketcap = df_MC.iat[0, 1]
 
         df_informations = pd.DataFrame({"Code": [s_code], "Price": [s_price], "Y_Price": [y_price], "1day_D": [y_difference],
                             "W_Price": [w_price], "1주일_D": [w_difference], "90일_H": [s_highest], "90_L": [s_lowest],
                             "90_P": [s_percentile], "1000일_H": [s_highest_1000], "1000일_L": [s_lowest_1000],
                             "1000일_P": [s_percentile_1000], "매출_21": [Sales_2021], "영업_21": [OperatingIncome_2021],
                             "순이익_21": [NetIncome_2021], "매출_20": [Sales_2020], "영업_20": [OperatingIncome_2020],
-                            "순이익_20": [NetIncome_2020], "시가총액": [market_cap]})
+                            "순이익_20": [NetIncome_2020], "시가총액": [marketcap]})
 
         return df_informations
 
