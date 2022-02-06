@@ -64,7 +64,7 @@ def get_price(code):
         r = requests.get(url, headers=headers)
         data = json.loads(r.text)
         df = pd.DataFrame(data['data'])
-
+        # print(df.columns)
         url_1000 = f'http://finance.daum.net/api/charts/A{code}/days?limit=1000&adjusted=true'
         headers_1000 = {'Accept': 'application/json, text/plain, */*', 'Accept-Encoding': 'gzip, deflate',
                         'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7', 'Connection': 'keep-alive',
@@ -89,6 +89,12 @@ def get_price(code):
 
         s_code = df.iat[2, 0]
         s_price = df.iat[-1, 3]
+        s_openingprice = df.iat[-1, 4]
+        oneday_low = df.iat[-1, 6]
+        oneday_high = df.iat[-1, 5]
+
+
+
         y_price = df.iat[-2, 3]
         y_difference = s_price - y_price
         w_price = df.iat[-8, 3]
@@ -128,7 +134,8 @@ def get_price(code):
         market_cap = df_MC.iat[0, 1]
 
         df_informations = pd.DataFrame(
-            {"Code": [s_code], "Price": [s_price], "Y_Price": [y_price], "1day_D": [y_difference],
+            {"Code": [s_code], "Price": [s_price], "시가": s_openingprice, "저가":oneday_low,"고가":oneday_high,
+             "Y_Price": [y_price], "1day_D": [y_difference],
              "W_Price": [w_price], "1주일_D": [w_difference], "90일_H": [s_highest], "90_L": [s_lowest],
              "90_P": [s_percentile], "1000일_H": [s_highest_1000], "1000일_L": [s_lowest_1000],
              "1000일_P": [s_percentile_1000], "매출_21": [Sales_2021], "영업_21": [OperatingIncome_2021],
@@ -141,6 +148,8 @@ def get_price(code):
         df_exception = pd.DataFrame({"Code": [s_code], "Price": [s_price]})
 
         return df_exception
+
+
 
 
 def get_prices(corp_name_code_df):
@@ -166,11 +175,14 @@ def make_excel():
     final.to_excel(f'{windows_user_name}/Desktop/{today}.xlsx')
 
 
+
 from PyQt5.QtWidgets import QFileDialog, QMainWindow, QApplication, QPushButton, QMessageBox, QLabel, QTextEdit, \
     QWidget, QProgressBar
 import sys
 
 drt = ''
+
+
 
 
 class MainWindow(QMainWindow):

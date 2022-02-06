@@ -4,7 +4,7 @@
 block_cipher = None
 
 
-a = Analysis(['StockAnalysis.py'],
+a = Analysis(['stockAnalysis.py'],
              pathex=['C:\\Users\\Jay Lee\\Desktop\\Portfolio\\StockAnalysis'],
              binaries=[],
              datas=[],
@@ -26,7 +26,7 @@ exe = EXE(pyz,
           a.zipfiles,
           a.datas,  
           [],
-          name='StockAnalysis',
+          name='stockAnalysis',
           debug=False,
           bootloader_ignore_signals=False,
           strip=False,
