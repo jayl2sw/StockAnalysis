@@ -5,44 +5,6 @@ import json
 import os
 from datetime import datetime
 
-windows_user_name = os.path.expanduser('~')
-today = datetime.today().strftime('%Y-%m-%d')
-
-
-# input = 파일 경로 ouput = 종목 이름 리스트
-def read_excel(path):
-    if path[-1] == 'x':
-        try:
-            input_data = pd.read_excel(path)
-            names = []
-            for i in range(len(input_data['회사명'])):
-                names.append(input_data['회사명'][i])
-            return names
-        except Exception as ex:
-            print(ex)
-
-    else:
-        try:
-            input_data = pd.read_csv(path)
-            names = []
-            for i in range(len(input_data['회사명'])):
-                names.append(input_data['회사명'][i])
-            return names
-        except Exception as ex:
-            print(ex)
-
-
-# 종목이름 리스트 ==> 이름 코드 데이터프레임
-def get_code(names):
-    df = pd.read_html('http://kind.krx.co.kr/corpgeneral/corpList.do?method=download', header=0)[0]
-    df = df[['회사명', '종목코드']]
-    df = df.rename(columns={'회사명': 'Name', '종목코드': 'Code'})
-
-    nc_filter = df['Name'].isin(names)
-    nc_df = df.loc[nc_filter].reset_index(drop=True)
-    return nc_df
-
-
 def get_price(code):
     try:
         url = f'http://finance.daum.net/api/charts/A{code}/days?limit=90&adjusted=true'
@@ -64,6 +26,7 @@ def get_price(code):
         r = requests.get(url, headers=headers)
         data = json.loads(r.text)
         df = pd.DataFrame(data['data'])
+        print(df.columns)
 
         url_1000 = f'http://finance.daum.net/api/charts/A{code}/days?limit=1000&adjusted=true'
         headers_1000 = {'Accept': 'application/json, text/plain, */*', 'Accept-Encoding': 'gzip, deflate',
@@ -89,10 +52,19 @@ def get_price(code):
 
         s_code = df.iat[2, 0]
         s_price = df.iat[-1, 3]
+        oneday_tradevolume = df.iat[-1,8]
+
+
         y_price = df.iat[-2, 3]
         y_difference = s_price - y_price
+        y_tradevolume = df.iat[-2,8]
         w_price = df.iat[-8, 3]
         w_difference = s_price - w_price
+        w_tradevolume = 0
+        for i in range(1, 8):
+            w_tradevolume += df.iat[-i,8]
+        w_tradevolume /= 7
+
 
         s_highest = df["highPrice"].max()
         s_lowest = df["lowPrice"].min()
@@ -128,9 +100,10 @@ def get_price(code):
         market_cap = df_MC.iat[0, 1]
 
         df_informations = pd.DataFrame(
-            {"Code": [s_code], "Price": [s_price], "Y_Price": [y_price], "1day_D": [y_difference],
-             "W_Price": [w_price], "1주일_D": [w_difference], "90일_H": [s_highest], "90_L": [s_lowest],
-             "90_P": [s_percentile], "1000일_H": [s_highest_1000], "1000일_L": [s_lowest_1000],
+            {"Code": [s_code], "Price": [s_price],
+             "오늘거래량": [oneday_tradevolume], "Y_Price": [y_price], "어제거래량": [y_tradevolume], "1day_D": [y_difference],
+             "W_Price": [w_price], "일주일거래량": [w_tradevolume], "1주일_D": [w_difference], "90일_H": [s_highest],
+             "90_L": [s_lowest], "90_P": [s_percentile], "1000일_H": [s_highest_1000], "1000일_L": [s_lowest_1000],
              "1000일_P": [s_percentile_1000], "매출_21": [Sales_2021], "영업_21": [OperatingIncome_2021],
              "순이익_21": [NetIncome_2021], "매출_20": [Sales_2020], "영업_20": [OperatingIncome_2020],
              "순이익_20": [NetIncome_2020], "시가총액": [market_cap]})
@@ -142,92 +115,4 @@ def get_price(code):
 
         return df_exception
 
-
-def get_prices(corp_name_code_df):
-    df = pd.DataFrame()
-    for i in range(len(corp_name_code_df)):
-        in_code = str(corp_name_code_df.iat[i, 1]).zfill(6)
-        df = df.append(get_price(in_code))
-
-    corp_name_code_df = corp_name_code_df.reset_index()
-    df = df.reset_index()
-
-    merged_df = pd.concat([corp_name_code_df, df], axis=1)
-    final = merged_df.drop(['Code', 'index'], axis=1)
-    return final
-
-
-def make_excel():
-    global drt
-    corperations = read_excel(drt)
-    corps = get_code(corperations)
-    final = get_prices(corps)
-    print(final)
-    final.to_excel(f'{windows_user_name}/Desktop/{today}.xlsx')
-
-
-from PyQt5.QtWidgets import QFileDialog, QMainWindow, QApplication, QPushButton, QMessageBox, QLabel, QTextEdit, \
-    QWidget, QProgressBar
-import sys
-
-drt = ''
-
-
-class MainWindow(QMainWindow):
-    def btnRun_clicked(self):
-        btn = self.sender()
-        btn.setText('runing')
-        btn.setDisabled(True)  # 버튼 비활성화
-
-    def filedialog_open(self):
-
-        fname = QFileDialog.getOpenFileName(self, 'Open File', '',
-                                            'All File(*);; html File(*.html *.htm)')
-        global drt
-        drt = str(fname[0])
-
-        if fname[0]:
-            # 튜플 데이터에서 첫 번째 인자 값이 주소이다.
-            self.path.setText(drt)
-            print('filepath : ', drt)
-            print('filesort : ', fname[1])
-
-        else:
-            QMessageBox.about(self, 'Warning', '파일을 선택하지 않았습니다.')
-
-    def __init__(self):
-        global drt
-
-        super().__init__()
-        # 윈도우 설정
-        self.setGeometry(300, 200, 800, 120)  # x, y, w, h
-        self.setWindowTitle('주식분석기!')
-
-        self.Lbl1 = QLabel(self)
-        self.Lbl1.setText('주식 종목 파일:')
-        self.Lbl1.setGeometry(20, 20, 180, 32)
-
-        # QButton 위젯 생성 - FileDialog 을 띄위기 위한 버튼
-        self.button = QPushButton('Search...', self)
-        self.button.clicked.connect(self.filedialog_open)
-        self.button.setGeometry(580, 20, 200, 32)
-
-        # QTextEdit 파일 읽은 내용 표시
-
-        self.path = QTextEdit(self)
-        self.path.setGeometry(165, 20, 400, 74)
-
-        self.exe_btn = QPushButton('확인', self)
-        self.exe_btn.clicked.connect(make_excel)
-        self.exe_btn.setGeometry(580, 60, 95, 32)
-
-        self.quit_btn = QPushButton('취소', self)
-        self.quit_btn.setGeometry(685, 60, 95, 32)
-        self.quit_btn.clicked.connect(QApplication.instance().quit)
-
-
-if __name__ == '__main__':
-    app = QApplication(sys.argv)
-    mainWindow = MainWindow()
-    mainWindow.show()
-    sys.exit(app.exec_())
+print(get_price('005930'))
