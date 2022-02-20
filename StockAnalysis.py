@@ -38,8 +38,12 @@ def get_code(names):
     df = df[['회사명', '종목코드']]
     df = df.rename(columns={'회사명': 'Name', '종목코드': 'Code'})
 
-    nc_filter = df['Name'].isin(names)
-    nc_df = df.loc[nc_filter].reset_index(drop=True)
+    nc_df = pd.DataFrame(columns =['Name', 'Code'])
+    for name in names:
+        nc_df = pd.concat([nc_df, df.loc[df['Name'] == name]],ignore_index=True)
+
+    # nc_filter = df['Name'].isin(names)
+    # nc_df = df.loc[nc_filter].reset_index(drop=True)
     return nc_df
 
 
