@@ -48,6 +48,8 @@ def get_code(names):
 
 
 def get_price(code):
+    global vol
+
     try:
         url = f'http://finance.daum.net/api/charts/A{code}/days?limit=90&adjusted=true'
         headers = {'Accept': 'application/json, text/plain, */*', 'Accept-Encoding': 'gzip, deflate',
@@ -145,15 +147,25 @@ def get_price(code):
         NetIncome_2020 = df_JMJP.iat[2, 3]
 
         market_cap = df_MC.iat[0, 1]
+        if vol == True:
+            df_informations = pd.DataFrame(
+                {"Code": [s_code], "Price": [s_price], "Y_Price": [y_price], "1day_D": [y_difference],
+                 "W_Price": [w_price], "오늘거래량": [oneday_tradevolume], "어제거래량": [y_tradevolume],
+                 "일주일거래량": [w_tradevolume], "1주일_D": [w_difference], "90일_H": [s_highest],
+                 "90_L": [s_lowest], "90_P": [s_percentile], "1000일_H": [s_highest_1000], "1000일_L": [s_lowest_1000],
+                 "1000일_P": [s_percentile_1000], "매출_21": [Sales_2021], "영업_21": [OperatingIncome_2021],
+                 "순이익_21": [NetIncome_2021], "매출_20": [Sales_2020], "영업_20": [OperatingIncome_2020],
+                 "순이익_20": [NetIncome_2020], "시가총액": [market_cap]})
 
-        df_informations = pd.DataFrame(
-            {"Code": [s_code], "Price": [s_price],
-             "Y_Price": [y_price], "1day_D": [y_difference],
-             "W_Price": [w_price], "1주일_D": [w_difference], "90일_H": [s_highest],
-             "90_L": [s_lowest], "90_P": [s_percentile], "1000일_H": [s_highest_1000], "1000일_L": [s_lowest_1000],
-             "1000일_P": [s_percentile_1000], "매출_21": [Sales_2021], "영업_21": [OperatingIncome_2021],
-             "순이익_21": [NetIncome_2021], "매출_20": [Sales_2020], "영업_20": [OperatingIncome_2020],
-             "순이익_20": [NetIncome_2020], "시가총액": [market_cap]})
+        else:
+            df_informations = pd.DataFrame(
+                {"Code": [s_code], "Price": [s_price],
+                 "Y_Price": [y_price], "1day_D": [y_difference],
+                 "W_Price": [w_price], "1주일_D": [w_difference], "90일_H": [s_highest],
+                 "90_L": [s_lowest], "90_P": [s_percentile], "1000일_H": [s_highest_1000], "1000일_L": [s_lowest_1000],
+                 "1000일_P": [s_percentile_1000], "매출_21": [Sales_2021], "영업_21": [OperatingIncome_2021],
+                 "순이익_21": [NetIncome_2021], "매출_20": [Sales_2020], "영업_20": [OperatingIncome_2020],
+                 "순이익_20": [NetIncome_2020], "시가총액": [market_cap]})
 
         return df_informations
 
@@ -174,6 +186,7 @@ def get_price(code):
                    'Referer': 'http://finance.daum.net/quotes/A%s' % code,
                    'User-Agent': 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) '
                                  'Chrome/70.0.3538.77 Safari/537.36'}
+
         r = requests.get(url, headers=headers)
         data = json.loads(r.text)
         df = pd.DataFrame(data['data'])
@@ -205,14 +218,20 @@ def make_excel():
     corps = get_code(corperations)
     final = get_prices(corps)
     print(final)
-    final.to_excel(f'{windows_user_name}/Desktop/{today}.xlsx')
+    if vol == True:
+        final.to_excel(f'{windows_user_name}/Desktop/{today}_거래량o.xlsx')
+    else:
+        final.to_excel(f'{windows_user_name}/Desktop/{today}_거래량x.xlsx')
 
 
 from PyQt5.QtWidgets import QFileDialog, QMainWindow, QApplication, QPushButton, QMessageBox, QLabel, QTextEdit, \
-    QWidget, QProgressBar
+    QWidget, QProgressBar, QCheckBox
+from PyQt5.QtCore import Qt
 import sys
 
+
 drt = ''
+vol = False
 
 
 class MainWindow(QMainWindow):
@@ -238,27 +257,32 @@ class MainWindow(QMainWindow):
         else:
             QMessageBox.about(self, 'Warning', '파일을 선택하지 않았습니다.')
 
+    def plus_volume(self, state):
+        global vol
+        if state == Qt.Checked:
+            vol = True
+        else:
+            vol = False
+
     def __init__(self):
         global drt
 
         super().__init__()
         # 윈도우 설정
-        self.setGeometry(300, 200, 800, 120)  # x, y, w, h
+        self.setGeometry(300, 200, 800, 150)  # x, y, w, h
         self.setWindowTitle('주식분석기!')
 
         self.Lbl1 = QLabel(self)
         self.Lbl1.setText('주식 종목 파일:')
         self.Lbl1.setGeometry(20, 20, 180, 32)
 
+        self.path = QTextEdit(self)
+        self.path.setGeometry(165, 20, 400, 74)
+
         # QButton 위젯 생성 - FileDialog 을 띄위기 위한 버튼
         self.button = QPushButton('Search...', self)
         self.button.clicked.connect(self.filedialog_open)
         self.button.setGeometry(580, 20, 200, 32)
-
-        # QTextEdit 파일 읽은 내용 표시
-
-        self.path = QTextEdit(self)
-        self.path.setGeometry(165, 20, 400, 74)
 
         self.exe_btn = QPushButton('확인', self)
         self.exe_btn.clicked.connect(make_excel)
@@ -267,6 +291,21 @@ class MainWindow(QMainWindow):
         self.quit_btn = QPushButton('취소', self)
         self.quit_btn.setGeometry(685, 60, 95, 32)
         self.quit_btn.clicked.connect(QApplication.instance().quit)
+
+        self.checkboxes()
+
+    def checkboxes(self):
+        volume = QCheckBox('거래량', self)
+        volume.move(30, 60)
+        volume.stateChanged.connect(self.plus_volume)
+
+
+        # # Checkbox
+        # self.volume = QCheckBox('거래량')
+        # self.volume.move(100, 400)
+        # self.volume.toggle()
+        # self.volume.stateChanged.connect(self.plus_volume)
+
 
 
 if __name__ == '__main__':

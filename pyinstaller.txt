@@ -1,1 +1,1 @@
-pyinstaller -F -w --icon=icon.ico stockAnalysis.py
+pyinstaller -F -w --icon=icon.ico StockAnalysis.py

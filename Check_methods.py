@@ -4,7 +4,8 @@ import json
 
 import os
 from datetime import datetime
-
+import time
+print()
 def get_price(code):
     try:
         url = f'http://finance.daum.net/api/charts/A{code}/days?limit=90&adjusted=true'
