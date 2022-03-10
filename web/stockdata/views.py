@@ -51,12 +51,16 @@ def get_info(code):
     tables = pd.read_html(url_JMJP, encoding='euc-kr')
     df_JMJP = tables[3]
     df_MC = tables[5]
-    sales_21 = int(df_JMJP.iat[0, 4])
-    operatingincome_21 = int(df_JMJP.iat[1, 4])
-    netincome_21 = int(df_JMJP.iat[2, 4])
-    sales_20 = int(df_JMJP.iat[0, 3])
-    operatingincome_20 = int(df_JMJP.iat[1, 3])
-    netincome_20 = int(df_JMJP.iat[2, 3])
+    if '2022.12(E)' in df_JMJP.columns[4]:
+        i = 3
+    else:
+        i = 4
+    sales_21 = int(df_JMJP.iat[0, i])
+    operatingincome_21 = int(df_JMJP.iat[1, i])
+    netincome_21 = int(df_JMJP.iat[2, i])
+    sales_20 = int(df_JMJP.iat[0, i-1])
+    operatingincome_20 = int(df_JMJP.iat[1, i-1])
+    netincome_20 = int(df_JMJP.iat[2, i-1])
     market_cap = df_MC.iat[0, 1]
     result = {'sales_21':sales_21,'operatingincome_21':operatingincome_21,'netincome_21':netincome_21,
     'sales_20':sales_20,'operatingincome_20':operatingincome_20,'netincome_20':netincome_20,'market_cap':market_cap}
@@ -64,7 +68,7 @@ def get_info(code):
     return result
 
 
-def main(request):
+def main(request, warning=None):
     if request.method == 'POST':
         corp = Corperations()
         c_name = request.POST.get('name')
@@ -75,7 +79,7 @@ def main(request):
             try:
                 code = get_code(c_name)
             except:
-                return redirect('stockdata:main')      
+                pass
             corp.c_code = code    
             corp.c_price = get_price(code)
 
@@ -84,18 +88,24 @@ def main(request):
             if str(c_code)[0]!='A':
                 code = 'A'+str(c_code).zfill(6)
             corp.c_code = code
-            corp.c_name = get_name(code)
-            corp.c_price = get_price(code)
-                
-        informations = get_info(code)
-        corp.sales_21 = informations['sales_21']
-        corp.operatingincome_21 = informations['operatingincome_21']
-        corp.netincome_21 = informations['netincome_21']
-        corp.sales_20 = informations['sales_20']
-        corp.operatingincome_20 = informations['operatingincome_20']
-        corp.netincome_20 = informations['netincome_20']
-        corp.market_cap = informations['market_cap']
-        corp.save()
+            try:
+                corp.c_name = get_name(code)
+                corp.c_price = get_price(code)
+            except:
+                pass
+        try:        
+            informations = get_info(code)
+            
+            corp.sales_21 = informations['sales_21']
+            corp.operatingincome_21 = informations['operatingincome_21']
+            corp.netincome_21 = informations['netincome_21']
+            corp.sales_20 = informations['sales_20']
+            corp.operatingincome_20 = informations['operatingincome_20']
+            corp.netincome_20 = informations['netincome_20']
+            corp.market_cap = informations['market_cap']
+            corp.save()
+        except:
+            pass
 
         return redirect('stockdata:main')
 
@@ -103,7 +113,8 @@ def main(request):
         corps = Corperations.objects.all()
 
         context = {
-            'corps': corps
+            'corps': corps,
+            'warning':warning,
         }
         
     return render(request, 'corperations/main.html', context)
