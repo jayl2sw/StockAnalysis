@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h2 class="fs-3 fw-bold my-5">{{ corp.c_name }}</h2>
+
+  <div class="container border">
+    <div class="row border">
+      <div class="col-3">2020_매출</div>
+      <div class="col-3">{{ corp.sales_2020 }}</div>
+      <div class="col-3">2021_매출</div>
+      <div class="col-3">{{ corp.sales_2021 }}</div>
+    </div>
+    <div class="row border">
+      <div class="col-3">2020_영업이익</div>
+      <div class="col-3">{{ corp.operatingincome_2020 }}</div>
+      <div class="col-3">2021_영업이익</div>
+      <div class="col-3">{{ corp.operatingincome_2021 }}</div>
+    </div>
+    <div class="row border">
+      <div class="col-3">2020_순이익</div>
+      <div class="col-3">{{ corp.netincome_2020 }}</div>
+      <div class="col-3">2021_영업이익</div>
+      <div class="col-3">{{ corp.netincome_2021 }}</div>
+    </div>
+    <div class="row border">
+      <div class="col-3">시가총액</div>
+      <div class="col-3">{{ corp.market__cap }}</div>
+      <div class="col-3"></div>
+      <div class="col-3"></div>
+    </div>
+  </div>
+  <form action="" method="POST">
+    {% csrf_token %}
+    <input type="submit" value="갱신">
+  </form>
+
+
+{% endblock content %}
