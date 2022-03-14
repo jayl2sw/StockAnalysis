@@ -23,6 +23,15 @@ class Corperations(models.Model):
 #     changePrice = models.IntegerField()
 #     changeRate = models.FloatField()
 
+class PriceinDate(models.Model):
+    c_name = models.CharField(max_length=20)
+    c_code = models.CharField(max_length=10)
+    date = models.DateField()
+    tradePrice = models.IntegerField()
+    openingPrice = models.IntegerField()
+    highPrice = models.IntegerField()
+    lowPrice = models.IntegerField()
+
 
 class Analyzed_Data(models.Model):
     code = models.CharField(max_length=10, primary_key=True)

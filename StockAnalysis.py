@@ -3,6 +3,7 @@ import pandas as pd
 import json
 
 import os
+
 from datetime import datetime
 
 windows_user_name = os.path.expanduser('~')
@@ -150,8 +151,8 @@ def get_price(code):
         if vol == True:
             df_informations = pd.DataFrame(
                 {"Code": [s_code], "Price": [s_price], "Y_Price": [y_price], "1day_D": [y_difference],
-                 "W_Price": [w_price], "오늘거래량": [oneday_tradevolume], "어제거래량": [y_tradevolume],
-                 "일주일거래량": [w_tradevolume], "1주일_D": [w_difference], "90일_H": [s_highest],
+                 "W_Price": [w_price], "1주일_D": [w_difference], "오늘거래량": [oneday_tradevolume], "어제거래량": [y_tradevolume],
+                 "일주일거래량": [w_tradevolume],  "90일_H": [s_highest],
                  "90_L": [s_lowest], "90_P": [s_percentile], "1000일_H": [s_highest_1000], "1000일_L": [s_lowest_1000],
                  "1000일_P": [s_percentile_1000], "매출_21": [Sales_2021], "영업_21": [OperatingIncome_2021],
                  "순이익_21": [NetIncome_2021], "매출_20": [Sales_2020], "영업_20": [OperatingIncome_2020],
@@ -197,6 +198,7 @@ def get_price(code):
 
         return df_exception
 
+get_price('005930')
 
 def get_prices(corp_name_code_df):
     df = pd.DataFrame()
@@ -204,7 +206,7 @@ def get_prices(corp_name_code_df):
         in_code = str(corp_name_code_df.iat[i, 1]).zfill(6)
         df = df.append(get_price(in_code))
 
-    corp_name_code_df = corp_name_code_df.reset_index()
+    corp_name_code_df = corp_name_code_df.reset_inzdex()
     df = df.reset_index()
 
     merged_df = pd.concat([corp_name_code_df, df], axis=1)

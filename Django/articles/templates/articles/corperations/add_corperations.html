@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <form action="{% url 'articles:add_corperation' %}">
+    <label for="companyname">회사명 : </label>
+    <input type="text", id="companyname", name="companyname">
+    <input type="submit">
+  </form>
+  <a href="{% url 'articles:main' %}"></a>
+{% endblock content %}

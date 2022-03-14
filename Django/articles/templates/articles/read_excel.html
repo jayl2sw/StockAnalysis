@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1 class="fs-1 fw-bold">READ EXCEL</h1>
+  <br>
+  <form action="{% url 'articles:read_data' %}">
+    <label for="file_path"></label>
+    <input type="file" id="file_path" name="file_path">
+
+    <input type="submit">
+  </form>
+  
+  
+{% endblock content %}

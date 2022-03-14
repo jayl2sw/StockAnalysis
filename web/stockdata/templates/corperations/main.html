@@ -2,19 +2,20 @@
 
 {% block content %}
 <div class="container">
-  <form action="" method="POST">
-    {% csrf_token %}
-    <div class="d-flex justify-content-end">
-      <div class="grid">
-        <label for="name">회사명:</label>
-        <input type="text" id='name' name='name' placeholder='회사명을 입력하세요..'>
-        <label for="code">회사코드:</label>
-        <input type="text" id='code' name='code' placeholder='회사 코드' style="width: 100px">
-        <input type="submit" value='추가'>
+  <div class="row d-flex justify-content-end align-items-center">
+    <form action="" method="POST">
+      {% csrf_token %}
+      <div class="d-flex justify-content-end">
+        <div class="grid">
+          <label for="name">회사명:</label>
+          <input type="text" id='name' name='name' placeholder='회사명을 입력하세요..'>
+          <label for="code">회사코드:</label>
+          <input type="text" id='code' name='code' placeholder='회사 코드' style="width: 100px">
+          <input type="submit" value='추가'>
+        </div>
       </div>
-    </div>
-  </form>
-
+    </form>
+  </div>
   <div>
     <table class="table table-striped">
       <thead>

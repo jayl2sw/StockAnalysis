@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <ul>
+    {% for corp in corps %}
+      <li>{{ corp.c_name }}</li>
+    {% endfor %}
+  </ul>
+
+{% endblock content %}

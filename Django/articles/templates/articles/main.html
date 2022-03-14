@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1 class="fs-1 fw-bold">Stock Analysis</h1>
+
+  <a href="{% url 'articles:corperations' %}"><h2>Corperations</h2></a>
+  <a href="{% url 'articles:read_excel' %}"><h2>Read Excel</h2></a>
+  <a href="{% url 'articles:analyzed_data' %}"><h2>Analyzed Data</h2></a>
+
+{% endblock content %}

@@ -34,5 +34,27 @@
     <input type="submit" value="갱신">
   </form>
 
+  <table class="table">
+    <thead>
+      <tr>
+        <th scope="col">회사명</th>
+        <th scope="col">회사코드</th>
+        <th scope="col">날짜</th>
+        <th scope="col">가격</th>
+        <th scope="col">거래량</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for corpdate in corpdates %}
+      <tr>
+        <td>{{ corp.c_name }}</td>
+        <td>{{ corp.c_name }}</td>
+        <td>{{ corpdate.date }}</td>
+        <td>{{ corpdate.price }}</td>
+        <td>{{ corpdate.volume }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 
 {% endblock content %}
