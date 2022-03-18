@@ -12,6 +12,7 @@ class Corperations(models.Model):
     operatingincome_20 = models.IntegerField()
     netincome_20 = models.IntegerField()
     market_cap = models.TextField()
+    last_updated_date = models.DateField(default="2000-01-01")
     
 
 # class Stocks(models.Model):
@@ -31,6 +32,7 @@ class PriceinDate(models.Model):
     openingPrice = models.IntegerField()
     highPrice = models.IntegerField()
     lowPrice = models.IntegerField()
+    volume = models.IntegerField()
 
 
 class Analyzed_Data(models.Model):

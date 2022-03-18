@@ -45,12 +45,12 @@
       </tr>
     </thead>
     <tbody>
-      {% for corpdate in corpdates %}
+      {% for corpdate in priceinDate %}
       <tr>
         <td>{{ corp.c_name }}</td>
-        <td>{{ corp.c_name }}</td>
+        <td>{{ corp.c_code }}</td>
         <td>{{ corpdate.date }}</td>
-        <td>{{ corpdate.price }}</td>
+        <td>{{ corpdate.tradePrice }}</td>
         <td>{{ corpdate.volume }}</td>
       </tr>
       {% endfor %}
